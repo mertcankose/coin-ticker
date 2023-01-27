@@ -42217,11 +42217,18 @@ const {
 } = __webpack_require__(/*! socket.io */ "../node_modules/socket.io/dist/index.js");
 const WebSocket = __webpack_require__(/*! ws */ "../node_modules/ws/index.js");
 const serverless = __webpack_require__(/*! serverless-http */ "../node_modules/serverless-http/serverless-http.js");
+const cors = __webpack_require__(/*! cors */ "../node_modules/cors/lib/index.js");
 const app = express();
 const router = express.Router();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: "<http://localhost:4000>",
+    methods: ["GET", "POST"]
+  }
+});
 const PORT = 4000;
+app.use(cors());
 
 // const coinList = ["btctry", "atomtry", "dogetry"];
 
@@ -42231,7 +42238,7 @@ io.on("connection", socket => {
     const tickerWS = new WebSocket("wss://stream.binance.com:9443/ws/" + coin.toLowerCase() + "@ticker");
     tickerWS.on("message", data => {
       const coinTicker = JSON.parse(data);
-      io.emit(coin.toLowerCase(), coinTicker);
+      socket.emit(coin.toLowerCase(), coinTicker);
     });
   });
   socket.on("disconnect", () => {

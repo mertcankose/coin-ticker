@@ -3,13 +3,21 @@ const http = require("http");
 const { Server } = require("socket.io");
 const WebSocket = require("ws");
 const serverless = require("serverless-http");
+const cors = require("cors");
 
 const app = express();
 const router = express.Router();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: "<http://localhost:4000>",
+    methods: ["GET", "POST"],
+  },
+});
 
 const PORT = 4000;
+
+app.use(cors());
 
 // const coinList = ["btctry", "atomtry", "dogetry"];
 
@@ -22,7 +30,7 @@ io.on("connection", (socket) => {
     );
     tickerWS.on("message", (data) => {
       const coinTicker = JSON.parse(data);
-      io.emit(coin.toLowerCase(), coinTicker);
+      socket.emit(coin.toLowerCase(), coinTicker);
     });
   });
 
