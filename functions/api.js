@@ -42223,12 +42223,14 @@ const router = express.Router();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "<http://localhost:4000>",
-    methods: ["GET", "POST"]
+    origin: "*"
   }
 });
 const PORT = 4000;
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 
 // const coinList = ["btctry", "atomtry", "dogetry"];
 
