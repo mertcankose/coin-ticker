@@ -42221,7 +42221,12 @@ const cors = __webpack_require__(/*! cors */ "../node_modules/cors/lib/index.js"
 const app = express();
 const router = express.Router();
 const server = http.createServer(app);
-const io = new Server(server, {
+// const io = new Server(server, {
+//   cors: {
+//     origin: "*",
+//   },
+// });
+const io = __webpack_require__(/*! socket.io */ "../node_modules/socket.io/dist/index.js")(server, {
   cors: {
     origin: "*"
   }
