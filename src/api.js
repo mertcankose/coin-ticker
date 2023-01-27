@@ -5,41 +5,50 @@ const WebSocket = require("ws");
 const serverless = require("serverless-http");
 
 const app = express();
-
+const router = express.Router();
 const server = http.createServer(app);
-
 const io = new Server(server);
 
-const coinList = ["btctry", "atomtry", "dogetry"];
+const PORT = 4000;
 
-const router = express.Router();
+// const coinList = ["btctry", "atomtry", "dogetry"];
 
 io.on("connection", (socket) => {
-  console.log(`Yeni bir bağlantı : ${socket.id}`);
+  console.log(`Yeni bir socket bağlantısı : ${socket.id}`);
+
+  socket.on("getData", (coin) => {
+    const tickerWS = new WebSocket(
+      "wss://stream.binance.com:9443/ws/" + coin.toLowerCase() + "@ticker"
+    );
+    tickerWS.on("message", (data) => {
+      const coinTicker = JSON.parse(data);
+      io.emit(coin.toLowerCase(), coinTicker);
+    });
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Bir kullanıcı ayrıldı: " + socket.id);
+  });
 });
 
+/*
 const TickerSocket = (coin) => {
   const tickerWS = new WebSocket(
     "wss://stream.binance.com:9443/ws/" + coin.toLowerCase() + "@ticker"
   );
-  tickerWS.on("message", function incoming(data) {
+  tickerWS.on("message", (data) => {
     const coinTicker = JSON.parse(data);
     io.emit(coin.toLowerCase(), coinTicker);
   });
 };
+*/
 
 router.get("/", (req, res) => {
-  for (const item of coinList) {
-    TickerSocket(item);
-  }
+  res.json({ message: "Socket IO active!" });
 });
 
-router.get("/test", (req, res) => {
-  res.json({ message: "test" });
-});
-
-server.listen(4050, () => {
-  console.log("Sunucu 4050 portunda çalışıyor!");
+server.listen(PORT, () => {
+  console.log(`Sunucu ${PORT} portunda çalışıyor!`);
 });
 
 app.use("/.netlify/functions/api", router);
